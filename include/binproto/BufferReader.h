@@ -24,6 +24,11 @@ namespace binproto {
 
 		// FIXME: Document the API, since it's kinda public
 
+		/**
+		 * Completely rewind the buffer back to the start.
+		 */
+		void Rewind();
+
 		std::uint8_t ReadByte();
 
 		std::uint16_t ReadUint16();

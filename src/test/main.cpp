@@ -6,6 +6,8 @@
 #include <binproto/BufferReader.h>
 #include <binproto/BufferWriter.h>
 
+#include <binproto/Message.h>
+
 #include <binproto/Utils.h>
 
 #include <iostream>
@@ -32,13 +34,34 @@ struct StringContainer {
 	}
 };
 
+
+/**
+ * A sample message payload
+ */
+struct MyMessage : public binproto::Message<0x1, 0xB1790001, MyMessage> {
+	std::uint32_t n;
+
+	bool Read_(binproto::BufferReader& reader) {
+		n = reader.ReadUint32();
+		return true;
+	}
+
+	void Write_(binproto::BufferWriter& writer) const {
+		writer.WriteUint32(n);
+	}
+};
+
 int main() {
 	binproto::BufferWriter writer(4);
 
-	binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
-	binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
-	binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
-	binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
+	//binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
+	//binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
+	//binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
+	//binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
+	binproto::Write<MyMessage>(writer, { .n = 32 });
+	binproto::Write<MyMessage>(writer, { .n = 64 });
+	binproto::Write<MyMessage>(writer, { .n = 128 });
+	binproto::Write<MyMessage>(writer, { .n = 256 });
 
 	auto buf = writer.Release();
 
@@ -49,12 +72,11 @@ int main() {
 	binproto::BufferReader reader(buf.data(), buf.size());
 
 	while(true) {
-		auto strc = binproto::Read<StringContainer>(reader);
+		auto strc = binproto::Read<MyMessage>(reader);
 
 		if(strc.has_value()) {
 			auto& read = strc.value();
-			std::cerr << "S1: \"" << read.s1 << "\"\n";
-			std::cerr << "S2: \"" << read.s2 << "\"\n";
+			std::cerr << "N : " << read.n << '\n';
 		} else {
 			break;
 		}

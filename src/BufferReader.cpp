@@ -58,6 +58,11 @@ namespace binproto {
 			throw BufferOverrun(size);
 	}
 
+	//
+	void BufferReader::Rewind() {
+		cur = begin;
+	}
+
 	std::uint8_t BufferReader::ReadByte() {
 		BoundsCheck(sizeof(std::uint8_t));
 		return *cur++;

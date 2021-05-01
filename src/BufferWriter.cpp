@@ -24,7 +24,7 @@ namespace binproto {
 		if((cur_index_ + sizeof(std::uint8_t)) > buffer_.size())
 			Grow(sizeof(std::uint8_t));
 
-		buffer_[++cur_index_] = byte;
+		buffer_[cur_index_++] = byte;
 	}
 
 	void BufferWriter::WriteUint16(std::uint16_t val) {
