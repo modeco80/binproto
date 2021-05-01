@@ -1,5 +1,5 @@
 //
-// Simple test thing
+// Simple test thing (TODO use Catch2)
 // Created by lily on 4/29/2021.
 //
 

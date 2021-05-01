@@ -20,7 +20,7 @@ namespace binproto {
 	concept Writable = requires(T t, BufferWriter writer) {
 		// T::Write must take a BufferWriter& only, and can only
 		// return void (nothing else)
-		{ t.Write(writer) } ->std::convertible_to<void>;
+		{ t.Write(writer) } -> std::same_as<void>;
 	};
 
 } // namespace binproto
