@@ -36,7 +36,8 @@ namespace binproto {
 
 			// This is kiiinda crusty.. but whatever
 			try {
-				CRTPHelper()->Read_(reader);
+				if(!CRTPHelper()->Read_(reader))
+					return false;
 			} catch(std::exception& ex) {
 				return false;
 			}
