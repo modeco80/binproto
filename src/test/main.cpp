@@ -13,35 +13,27 @@
 #include <iostream>
 
 /**
- * A simple string container test,
- * which implements both the Writable and Readable concepts.
- *
- * If this can be read off the wire, we're doing great!
+ * Our sample magic value
  */
-struct StringContainer {
-	std::string s1;
-	std::string s2;
+constexpr static std::uint32_t magic = 0xB1794269;
 
-	bool Read(binproto::BufferReader& reader) {
-		s1 = reader.ReadString();
-		s2 = reader.ReadString();
-		return true;
-	}
-
-	void Write(binproto::BufferWriter& writer) const {
-		writer.WriteString(s1);
-		writer.WriteString(s2);
-	}
-};
-
-template<std::uint8_t ID, class Payload>
-using MyMessageConfig = binproto::Message<ID, 0xB1790001, Payload>;
+/**
+ * Shorthand customization point
+ * (as an example of *seriously* using the Message class template)
+ */
+template <std::uint8_t ID, class Payload>
+using MyMessageConfig = binproto::Message<ID, magic, Payload>;
 
 /**
  * A sample message payload
  */
-struct MyMessage : public /*binproto::Message<0x1, 0xB1790001, MyMessage>*/ MyMessageConfig<0x1, MyMessage> {
+struct MyMessage : public MyMessageConfig<0x1, MyMessage> {
+	// In here are fields that can describe the message.
 	std::uint32_t n;
+
+	// These functions technically implement
+	// Readable and Writable, however Read and Write are taken up
+	// by the Message<ID, MAGIC, Payload> class template.
 
 	bool Read_(binproto::BufferReader& reader) {
 		n = reader.ReadUint32();
@@ -53,6 +45,9 @@ struct MyMessage : public /*binproto::Message<0x1, 0xB1790001, MyMessage>*/ MyMe
 	}
 };
 
+/**
+ * Another sample message payload.
+ */
 struct AnotherMessage : public MyMessageConfig<0x2, AnotherMessage> {
 	std::string str;
 
@@ -69,21 +64,27 @@ struct AnotherMessage : public MyMessageConfig<0x2, AnotherMessage> {
 int main() {
 	binproto::BufferWriter writer(4);
 
-	//binproto::Write<StringContainer>(writer, { "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" });
+	// Write a sample MyMessage and AnotherMessage
+	// inside of the buffer.
+
 	binproto::Write<MyMessage>(writer, { .n = 32 });
 	binproto::Write<AnotherMessage>(writer, { .str = "Obama" });
 
-
+	// Calling Release() on the writer results in us getting a serialized buffer.
+	// It's safe for us to send this buffer over the wire, and parse it.
 	auto buf = writer.Release();
 
 	// Write the bytes we wrote to the buffer to stdout for fun.
-	// Also lets us analyze the written data with hexdump!
+	// Also lets us analyze the written data with "hexdump -C" !
 	std::cout.write((char*)buf.data(), buf.size());
 
+	// Now, let's test our reading code by actually making a reader pointed to that serialized buffer!
 	binproto::BufferReader reader(buf.data(), buf.size());
 
-	// very similar to binproto::Read<> but doesn't return nullopt, instead a bool
-	auto read_helper = []<binproto::Readable T>(T& a, binproto::BufferReader& reader) {
+	// Very similar to binproto::Read<> but doesn't return nullopt, instead a bool
+	// if the read was successful (T::Read() returned true and no exceptions thrown)
+	// false otherwise
+	auto read_helper = []<binproto::Readable T>(T& a, binproto::BufferReader& reader) -> bool {
 		try {
 			if(!a.Read(reader))
 				return false;
@@ -95,15 +96,14 @@ int main() {
 	};
 
 	for(int i = 0; i < 2; ++i) {
-
 		// Read the WireMessageHeader header first.
 		binproto::WireMessageHeader header;
 
 		if(!read_helper(header, reader))
 			break;
 
-
-		// If the message is a MyMessage, then process it!
+		// If the message is a MyMessage, then parse the message as a
+		// MyMessage.
 		if(header.Is<MyMessage>()) {
 			MyMessage message;
 			message.header = header;
@@ -114,6 +114,8 @@ int main() {
 			}
 		}
 
+		// Otherwise, if it's AnotherMessage,
+		// parse it like that.
 		if(header.Is<AnotherMessage>()) {
 			AnotherMessage message;
 			message.header = header;
@@ -122,21 +124,5 @@ int main() {
 				std::cerr << "AnotherMessage: STR: \"" << message.str << "\"\n";
 			}
 		}
-
-
 	}
-
-
-	/*
-	while(true) {
-		auto strc = binproto::Read<MyMessage>(reader);
-
-		if(strc.has_value()) {
-			auto& read = strc.value();
-			std::cerr << "N : " << read.n << '\n';
-		} else {
-			break;
-		}
-	}
-	 */
 }

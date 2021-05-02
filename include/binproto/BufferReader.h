@@ -24,6 +24,8 @@ namespace binproto {
 
 		// FIXME: Document the API, since it's kinda public
 
+		// TODO: provide a Init routine to load in a buffer, so the same Reader and Writer objects can be used to read lots of buffers in
+
 		/**
 		 * Completely rewind the buffer back to the start.
 		 */

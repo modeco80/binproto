@@ -9,13 +9,11 @@
 
 namespace binproto::internal {
 
-	template<class T>
+	template <class T>
 	T ReadBE(const std::uint8_t* base);
 
-	template<class T>
+	template <class T>
 	void WriteBE(std::uint8_t* base, const T& val);
-}
-
-
+} // namespace binproto::internal
 
 #endif //BINPROTO_ENDIANUTILS_H

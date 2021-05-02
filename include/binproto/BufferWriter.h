@@ -11,7 +11,6 @@ namespace binproto {
 	 * Buffer writer, for writing wire format types to a buffer.
 	 */
 	struct BufferWriter {
-
 		/**
 		 * Constructor. Also grows to a given size immediately.
 		 * \param starting_size Starting size of the buffer
@@ -43,7 +42,6 @@ namespace binproto {
 		void WriteBytes(const std::vector<std::uint8_t>& bytes);
 
 	   private:
-
 		void Grow(std::size_t grow_by);
 
 		std::vector<std::uint8_t> buffer_;

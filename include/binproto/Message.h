@@ -8,7 +8,6 @@
 #include <binproto/BufferReader.h>
 #include <binproto/BufferWriter.h>
 
-
 namespace binproto {
 
 	/**
@@ -39,7 +38,7 @@ namespace binproto {
 		 *
 		 * \tparam Message The fully-defined message type to check.
 		 */
-		template<class Message>
+		template <class Message>
 		bool Is() const {
 			if(typename Message::Magic_Const() != magic)
 				return false;
@@ -55,9 +54,8 @@ namespace binproto {
 	 * \tparam MAGIC Message magic.
 	 * \tparam Payload Inherited payload class.
 	 */
-	template<std::uint8_t ID, std::uint32_t MAGIC, class Payload>
+	template <std::uint8_t ID, std::uint32_t MAGIC, class Payload>
 	struct Message {
-
 		// Expose magic and this message type ID as constants.
 		using Magic_Const = std::integral_constant<decltype(MAGIC), MAGIC>;
 		using ID_Const = std::integral_constant<decltype(ID), ID>;
@@ -65,7 +63,6 @@ namespace binproto {
 		WireMessageHeader header { MAGIC, ID };
 
 		bool Read(binproto::BufferReader& reader) {
-
 			// The header can be read first by an application then verified
 			if(!header.read) {
 				try {
@@ -100,12 +97,11 @@ namespace binproto {
 		}
 
 	   private:
-
 		constexpr Payload* CRTPHelper() const {
 			return (Payload*)this;
 		}
 	};
 
-}
+} // namespace binproto
 
 #endif //BINPROTO_MESSAGE_H

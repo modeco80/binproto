@@ -13,8 +13,8 @@ namespace binproto {
 	}
 
 	std::vector<std::uint8_t> BufferWriter::Release() {
-		std::vector<std::uint8_t> vec(buffer_.size());
-		memcpy(&vec[0], &buffer_[0], buffer_.size());
+		std::vector<std::uint8_t> vec(cur_index_);
+		memcpy(&vec[0], &buffer_[0], cur_index_);
 
 		buffer_.clear();
 		return vec;

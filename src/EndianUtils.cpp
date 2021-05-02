@@ -1,5 +1,7 @@
 #include <binproto/EndianUtils.h>
 
+// FIXME: Make this code have good paths for Emscripten
+
 #ifdef _MSC_VER
 	#if defined(_M_IX86) || defined(_M_AMD64)
 		#define LE_ISX86
