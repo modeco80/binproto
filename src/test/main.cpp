@@ -32,48 +32,54 @@ struct MyMessage : public MyMessageConfig<0x1, MyMessage> {
 	std::uint32_t n;
 
 	// These functions technically implement
-	// Readable and Writable, however Read and Write are taken up
+	// Readable and Writable,
+	// however Read and Write are taken up
 	// by the Message<ID, MAGIC, Payload> class template.
 
-	bool Read_(binproto::BufferReader& reader) {
+	bool ReadPayload(binproto::BufferReader& reader) {
 		n = reader.ReadUint32();
 		return true;
 	}
 
-	void Write_(binproto::BufferWriter& writer) const {
+	void WritePayload(binproto::BufferWriter& writer) const {
 		writer.WriteUint32(n);
 	}
 };
 
 /**
- * Another sample message payload.
+ * Another sample message payload, this time containing a string
  */
 struct AnotherMessage : public MyMessageConfig<0x2, AnotherMessage> {
 	std::string str;
 
-	bool Read_(binproto::BufferReader& reader) {
+	bool ReadPayload(binproto::BufferReader& reader) {
 		str = reader.ReadString();
 		return true;
 	}
 
-	void Write_(binproto::BufferWriter& writer) const {
+	void WritePayload(binproto::BufferWriter& writer) const {
 		writer.WriteString(str);
 	}
 };
 
 int main() {
-	// tune this to see how the library deals with growing the internal buffer
-	// For your use-case, tune the starting grow size effectively to allow as few
-	// reallocations as possible when writing a message (but be careful to also tune for low memory pressure.)
+	// Tune the `32` starting size and add some code to
+	// BufferWriter::Grow() to see how the library deals with growing the
+	// internal buffer when it needs to.
+	//
+	// For your use-case in your application, you should tune the starting grow size effectively to allow as few
+	// reallocations as possible when writing a message
+	// (but be careful to also tune for low memory pressure. 1024+ bytes may be ok to just let the system do it itself)
+	//
 	binproto::BufferWriter writer(32);
 
-	// Write a sample MyMessage and AnotherMessage
-	// inside of the buffer.
+	// Write a couple sample MyMessage and AnotherMessage
+	// messages inside of the buffer.
 
 	binproto::Write<MyMessage>(writer, { .n = 32 });
 	binproto::Write<AnotherMessage>(writer, { .str = "Obama" });
 
-	// Calling Release() on the writer results in us getting a serialized buffer.
+	// Calling the Release() function on the writer results in us getting a serialized wire format buffer.
 	// It's safe for us to send this buffer over the wire, and parse it.
 	auto buf = writer.Release();
 
@@ -84,7 +90,8 @@ int main() {
 	// Now, let's test our reading code by actually making a reader pointed to that serialized buffer!
 	binproto::BufferReader reader(buf.data(), buf.size());
 
-	// Very similar to binproto::Read<> but doesn't return nullopt, instead a bool
+	// This lambda
+	// is very similar to binproto::Read<> but doesn't return nullopt, instead a bool
 	// if the read was successful (T::Read() returned true and no exceptions thrown)
 	// false otherwise
 	auto read_helper = []<binproto::Readable T>(T& a, binproto::BufferReader& reader) -> bool {
@@ -98,6 +105,7 @@ int main() {
 		return true;
 	};
 
+	// Read our two messages.
 	for(int i = 0; i < 2; ++i) {
 		// Read the WireMessageHeader header first.
 		binproto::WireMessageHeader header;
@@ -127,5 +135,19 @@ int main() {
 				std::cerr << "AnotherMessage: STR: \"" << message.str << "\"\n";
 			}
 		}
+
+		// Another way to handle this (which is objectively cleaner), is
+		// a switch (which does not use the WireFormatHeader helper) ala:
+		//
+		//switch(header.id) {
+		//	case MyMessage::ID_Const():
+		//		break;
+		//
+		//	case AnotherMessage::ID_Const():
+		//		break;
+		//
+		//	default:
+		//		break;
+		//}
 	}
 }

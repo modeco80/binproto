@@ -6,7 +6,7 @@
 namespace {
 
 	/**
- 	 * Exception emitted on buffer overrun
+ 	 * Exception emitted on attempted buffer overrun
  	 */
 	struct BufferOverrun : public std::exception {
 		explicit BufferOverrun(std::size_t size)
@@ -54,11 +54,14 @@ namespace binproto {
 	}
 
 	void BufferReader::BoundsCheck(std::size_t size) const {
+		// If the current pointer + given size is over the end pointer,
+		// that would be a overrun.
 		if((cur + size) > end)
 			throw BufferOverrun(size);
+
+		// Otherwise it's OK!
 	}
 
-	//
 	void BufferReader::Rewind() {
 		cur = begin;
 	}

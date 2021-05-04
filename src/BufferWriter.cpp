@@ -75,7 +75,9 @@ namespace binproto {
 	void BufferWriter::WriteString(const std::string_view& string) {
 		// Write length prefix and then grow the buffer large enough to fit the string
 		WriteUint32(string.length());
-		Grow(string.length());
+
+		if((cur_index_ + string.length()) > buffer_.size())
+			Grow(string.length());
 
 		memcpy(&buffer_[cur_index_], &string[0], string.length());
 		cur_index_ += string.length();
@@ -85,7 +87,9 @@ namespace binproto {
 		// Grow the buffer large enough to fit the bytes,
 		// then write the length prefix and then the bytes themselves
 		WriteUint32(bytes.size());
-		Grow(bytes.size());
+
+		if((cur_index_ + bytes.size()) > buffer_.size())
+			Grow(bytes.size());
 
 		memcpy(&buffer_[cur_index_], &bytes[0], bytes.size());
 		cur_index_ += bytes.size();

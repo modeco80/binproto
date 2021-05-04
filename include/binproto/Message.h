@@ -39,7 +39,7 @@ namespace binproto {
 		 * \tparam Message The fully-defined message type to check.
 		 */
 		template <class Message>
-		bool Is() const {
+		[[nodiscard]] bool Is() const {
 			if(typename Message::Magic_Const() != magic)
 				return false;
 
@@ -81,7 +81,7 @@ namespace binproto {
 
 			// This is kiiinda crusty.. but whatever
 			try {
-				if(!CRTPHelper()->Read_(reader))
+				if(!CRTPHelper()->ReadPayload(reader))
 					return false;
 			} catch(std::exception& ex) {
 				return false;
@@ -93,10 +93,13 @@ namespace binproto {
 			header.Write(writer);
 
 			// call the payload write function
-			CRTPHelper()->Write_(writer);
+			CRTPHelper()->WritePayload(writer);
 		}
 
 	   private:
+		/**
+		 * Retreive a pointer to the payload type.
+		 */
 		constexpr Payload* CRTPHelper() const {
 			return (Payload*)this;
 		}
