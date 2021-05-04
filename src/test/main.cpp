@@ -62,7 +62,10 @@ struct AnotherMessage : public MyMessageConfig<0x2, AnotherMessage> {
 };
 
 int main() {
-	binproto::BufferWriter writer(4);
+	// tune this to see how the library deals with growing the internal buffer
+	// For your use-case, tune the starting grow size effectively to allow as few
+	// reallocations as possible when writing a message (but be careful to also tune for low memory pressure.)
+	binproto::BufferWriter writer(32);
 
 	// Write a sample MyMessage and AnotherMessage
 	// inside of the buffer.

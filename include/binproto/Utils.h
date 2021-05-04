@@ -17,7 +17,7 @@ namespace binproto {
 	 * Automatically swallows overrun exceptions, to avoid the pain of doing that in your code.
 	 * Also automatically rewinds the buffer so you can try reading again.
 	 *
-	 * This function only cares about Readable objects,
+	 * This function only cares about Readable *objects*,
 	 * for primitive types or buffers use the BufferReader methods directly.
 	 *
 	 * \tparam T Type to read

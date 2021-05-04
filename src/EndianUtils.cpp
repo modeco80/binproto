@@ -1,10 +1,8 @@
 #include <binproto/EndianUtils.h>
 
-// FIXME: Make this code have good paths for Emscripten
-
 #ifdef _MSC_VER
 	#if defined(_M_IX86) || defined(_M_AMD64)
-		#define LE_ISX86
+		#define BINPROTO_IS_X86
 	#endif
 
 	// On MSVC, we rely on the LE_ISX86 define
@@ -15,7 +13,7 @@
 #endif
 
 // If any of these cases are true we are compiling for a little endian environment
-#if defined(LE_ISX86) || __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if defined(BINPROTO_IS_X86) || __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	#define LE
 #endif
 

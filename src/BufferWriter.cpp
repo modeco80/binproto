@@ -13,9 +13,13 @@ namespace binproto {
 	}
 
 	std::vector<std::uint8_t> BufferWriter::Release() {
-		std::vector<std::uint8_t> vec(cur_index_);
+		std::vector<std::uint8_t> vec;
+
+		// Copy the buffer data to the buffer we are releasing
+		vec.resize(cur_index_);
 		memcpy(&vec[0], &buffer_[0], cur_index_);
 
+		// Clear the data buffer entirely.
 		buffer_.clear();
 		return vec;
 	}
@@ -26,6 +30,8 @@ namespace binproto {
 
 		buffer_[cur_index_++] = byte;
 	}
+
+	// TODO: Think about refactoring most of the boilerplate here to come from a template function.
 
 	void BufferWriter::WriteUint16(std::uint16_t val) {
 		// Grow the buffer if we need to
