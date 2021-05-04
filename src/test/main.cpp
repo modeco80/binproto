@@ -10,6 +10,8 @@
 
 #include <binproto/Utils.h>
 
+#include <binproto/Version.h>
+
 #include <iostream>
 
 /**
@@ -63,6 +65,7 @@ struct AnotherMessage : public MyMessageConfig<0x2, AnotherMessage> {
 };
 
 int main() {
+	std::cerr << "BinProto library version " << binproto::version::String() << '\n';
 	// Tune the `32` starting size and add some code to
 	// BufferWriter::Grow() to see how the library deals with growing the
 	// internal buffer when it needs to.

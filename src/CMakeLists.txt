@@ -6,6 +6,7 @@ add_library(binproto
 		EndianUtils.cpp
 		BufferReader.cpp
 		BufferWriter.cpp
+		Version.cpp
 )
 
 target_include_directories(binproto PUBLIC ${PROJECT_SOURCE_DIR}/include)
